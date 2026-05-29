@@ -1,0 +1,21 @@
+{
+  "short_name": "Stylo Admin",
+  "name": "Stylo | Sistema Operativo para Barberías",
+  "icons": [
+    {
+      "src": "icono.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icono.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/barbero.html",
+  "background_color": "#000000",
+  "display": "standalone",
+  "theme_color": "#d4af37",
+  "orientation": "portrait"
+}
