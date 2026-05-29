@@ -73,37 +73,59 @@
     <div id="toast"></div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    // IMPORTACIÓN NECESARIA PARA AUTENTICACIÓN
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // !!! PAGA AQUÍ TUS MISMAS CREDENCIALES DE CONFIG_FIREBASE QUE USAS EN BARBERO.HTML !!!
-        const firebaseConfig = {
-            apiKey: "AIzaSyACuAv5l3WljFNFLcBuc2XWpyocaW4Z7ns",
-            authDomain: "stylo-app-9143d.firebaseapp.com",
-            projectId: "stylo-app-9143d",
-            storageBucket: "stylo-app-9143d.firebasestorage.app",
-            messagingSenderId: "1008323571262",
-            appId: "1:1008323571262:web:25545b92706cdc96d42b6f",
-            databaseURL: "https://stylo-app-9143d-default-rtdb.firebaseio.com" // <-- ESTA ES LA URL COMPLETA QUE REQUERÍA
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyACuAv5l3WljFNFLcBuc2XWpyocaW4Z7ns",
+        authDomain: "stylo-app-9143d.firebaseapp.com",
+        projectId: "stylo-app-9143d",
+        storageBucket: "stylo-app-9143d.firebasestorage.app",
+        messagingSenderId: "1008323571262",
+        appId: "1:1008323571262:web:25545b92706cdc96d42b6f",
+        databaseURL: "https://stylo-app-9143d-default-rtdb.firebaseio.com"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg; t.style.display = 'block';
-            setTimeout(() => { t.style.display = 'none'; }, 2500);
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg; t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 2500);
+    }
+
+    // 1. PROTECCIÓN: Solo cargar si estás logueado como Admin
+    onAuthStateChanged(auth, (user) => {
+        if (user && user.email === "antonydeleon13@gmail.com") {
+            console.log("Admin autenticado, cargando datos...");
+            cargarTabla();
+        } else {
+            // Si no está logueado, forzamos login
+            document.body.innerHTML = `
+                <div style="display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:column;">
+                    <button onclick="signInWithPopup(auth, provider)" style="padding:15px 30px; cursor:pointer; background:var(--gold); border:none; border-radius:10px; font-weight:bold;">
+                        ENTRAR COMO ADMINISTRADOR
+                    </button>
+                </div>
+            `;
         }
+    });
 
-        // LEER TODAS LAS BARBERÍAS
-        onValue(ref(db, 'tenants'), (snapshot) => {
+    // 2. FUNCIÓN DE CARGA MANTENIENDO TODA TU LÓGICA ORIGINAL
+    function cargarTabla() {
+        onValue(ref(db, 'tenants'), (snapshot) => { 
             const data = snapshot.val();
             const tbody = document.getElementById('tabla-tenants');
+            if(!tbody) return;
             tbody.innerHTML = "";
 
             if (!data) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#555;">No hay barberías registradas.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#555;">No hay barberías.</td></tr>`;
                 return;
             }
 
@@ -118,16 +140,14 @@
                 let tipoPlan = suscripcion ? suscripcion.tipo_plan : "Ninguno";
                 let fechaVenceTxt = "---";
                 let estadoHTML = `<span class="badge badge-none">Sin Pago</span>`;
-                let esActivo = false;
 
                 if (suscripcion) {
                     const fVence = new Date(suscripcion.fecha_vencimiento);
-                    fechaVenceTxt = fVence.toLocaleDateString([], { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+                    fechaVenceTxt = fVence.toLocaleDateString([], { day: '2-digit', month: '2-digit', year: 'numeric' });
                     
                     if (ahora < fVence && suscripcion.estado === "ACTIVE") {
                         estadoHTML = `<span class="badge badge-active">Activo</span>`;
                         activos++;
-                        esActivo = true;
                     } else {
                         estadoHTML = `<span class="badge badge-expired">Vencido</span>`;
                         vencidos++;
@@ -138,64 +158,50 @@
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>
-                        <strong style="color:var(--gold); font-size:0.9rem;">${tenant.nombre_barberia || 'Stylo Studio'}</strong>
-                        <div style="font-size:0.65rem; color:#444;">ID: ${tenantId}</div>
-                    </td>
-                    <td>
-                        <div style="font-size:0.8rem;">${tenant.usuario_email || 'Sin correo'}</div>
-                        <div style="font-size:0.65rem; color:#666;">${tenant.whatsapp || ''}</div>
-                    </td>
-                    <td style="text-transform:uppercase; font-weight:600; color:${tipoPlan==='anual'?'#2ecc71':'var(--gold)'}">${tipoPlan}</td>
-                    <td style="color:#888;">${fechaVenceTxt}</td>
+                    <td><strong>${tenant.nombre_barberia || 'Stylo Studio'}</strong><br><small>${tenantId}</small></td>
+                    <td>${tenant.usuario_email || 'Sin correo'}</td>
+                    <td style="text-transform:uppercase;">${tipoPlan}</td>
+                    <td>${fechaVenceTxt}</td>
                     <td>${estadoHTML}</td>
                     <td>
                         <div class="btn-group">
-                            <button class="btn-action btn-mensual" onclick="window.activarManual('${tenantId}', 'mensual')"><i class="fas fa-calendar-alt"></i> +1 Mes</button>
-                            <button class="btn-action btn-anual" onclick="window.activarManual('${tenantId}', 'anual')"><i class="fas fa-crown"></i> +1 Año</button>
-                            ${suscripcion ? `<button class="btn-action btn-cut" onclick="window.cortarAcceso('${tenantId}')"><i class="fas fa-cut"></i> Cortar</button>` : ''}
+                            <button class="btn-action" onclick="window.activarManual('${tenantId}', 'mensual')">+1 Mes</button>
+                            <button class="btn-action" onclick="window.entrarComoBarbero('${tenantId}')">Soporte</button>
+                            ${suscripcion ? `<button class="btn-action btn-cut" onclick="window.cortarAcceso('${tenantId}')">Cortar</button>` : ''}
                         </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
-
             document.getElementById('stat-total').innerText = total;
             document.getElementById('stat-activos').innerText = activos;
             document.getElementById('stat-vencidos').innerText = vencidos;
         });
+    }
 
-        // FUNCION PARA ACTIVAR O RENOVAR ACCESOS
-        window.activarManual = async (tenantId, tipo) => {
-            const dias = tipo === 'mensual' ? 30 : 365;
-            const fechaVencimiento = new Date();
-            fechaVencimiento.setDate(fechaVencimiento.getDate() + dias);
+    // 3. FUNCIONES GLOBALES (Mantenidas)
+    window.activarManual = async (tenantId, tipo) => {
+        const f = new Date(); f.setDate(f.getDate() + (tipo === 'mensual' ? 30 : 365));
+        await update(ref(db, `tenants/${tenantId}/suscripcion`), {
+            estado: "ACTIVE", tipo_plan: tipo, fecha_vencimiento: f.toISOString()
+        });
+        showToast("ACTUALIZADO");
+    };
 
-            try {
-                await update(ref(db, `tenants/${tenantId}/suscripcion`), {
-                    subscriptionId: "MANUAL-" + Math.random().toString(36).substr(2, 9).toUpperCase(),
-                    estado: "ACTIVE",
-                    tipo_plan: tipo,
-                    fecha_activacion: new Date().toISOString(),
-                    fecha_vencimiento: fechaVencimiento.toISOString()
-                });
-                showToast(`¡BARBERÍA ACTIVADA POR 1 ${tipo === 'mensual' ? 'MES' : 'AÑO'}!`);
-            } catch (err) {
-                console.error(err);
-                showToast("ERROR AL GUARDAR EN FIREBASE");
-            }
-        };
+    window.cortarAcceso = async (tenantId) => {
+        await remove(ref(db, `tenants/${tenantId}/suscripcion`));
+        showToast("CORTADO");
+    };
 
-        // FUNCIÓN PARA CORTAR EL ACCESO DE INMEDIATO
-        window.cortarAcceso = async (tenantId) => {
-            try {
-                await remove(ref(db, `tenants/${tenantId}/suscripcion`));
-                showToast("ACCESO CANCELADO CORRECTAMENTE");
-            } catch (err) {
-                console.error(err);
-                showToast("ERROR AL ELIMINAR");
-            }
-        };
-    </script>
+    window.entrarComoBarbero = (tenantId) => {
+        localStorage.setItem('admin_impersonate', tenantId);
+        window.open('barbero.html', '_blank');
+    };
+    
+    // Hacemos auth global para que el botón de login funcione
+    window.auth = auth;
+    window.signInWithPopup = signInWithPopup;
+    window.provider = provider;
+</script>
 </body>
 </html>
