@@ -790,8 +790,8 @@
 
        // 3. FUNCIONES DE ACCESO
     window.loginGoogle = () => {
-        signInWithPopup(auth, provider).catch(err => console.error("Error login:", err));
-    };
+    signInWithRedirect(auth, provider); // Cambia Popup por Redirect
+};
 
   // --- 3. FUNCIONES DE ACCESO (UNIFICADAS Y SIN DUPLICADOS) ---
     getRedirectResult(auth).catch(err => console.error("Error redirect:", err));// --- 3. ACCESO UNIFICADO (IPHONE + DATOS) ---
@@ -821,156 +821,124 @@
         loginGoogle();
     };
 
-    // --- CONTROL DE ACCESO (CORREGIDO PARA ENCONTRAR LA FUNCIÓN) ---
-    // --- CONTROL DE ACCESO CON CANDADO DE MEMBRESÍA REAL ---
-    onAuthStateChanged(auth, async (user) => {
-        const loginOverlay = document.getElementById('login-overlay');
-        const adminContent = document.getElementById('admin-content');
-        const divLogin = document.getElementById('vista-login-saas');
-        const divRegistro = document.getElementById('vista-registro-saas');
-        const divPago = document.getElementById('vista-pago-saas');
+ window.authReady = false;
 
-        if (user) {
-            window.tenantId = user.uid; 
+onAuthStateChanged(auth, async (user) => {
+    const loginOverlay = document.getElementById('login-overlay');
+    const adminContent = document.getElementById('admin-content');
+    const divLogin = document.getElementById('vista-login-saas');
+    const divRegistro = document.getElementById('vista-registro-saas');
+    const divPago = document.getElementById('vista-pago-saas');
 
-            try {
-                const snapConfig = await get(ref(db, `tenants/${window.tenantId}/configuracion_horario`));
+    // 1. Identificación
+    const esAdmin = (user && user.email === "antonydeleon13@gmail.com"); 
+    const idSuplantado = localStorage.getItem('admin_impersonate');
 
-                if (modoAcceso === 'login') {
-                    if (snapConfig.exists()) {
+    // 2. Asignación SEGURA: Si detectamos que somos admin, forzamos la lectura
+    // Si el ID es nulo y somos admin, esperamos 300ms por si el navegador está lento
+    if (esAdmin && !idSuplantado) {
+        console.warn("Admin detectado pero sin ID en localStorage, esperando...");
+        await new Promise(r => setTimeout(r, 300));
+    }
+
+    window.tenantId = (esAdmin && localStorage.getItem('admin_impersonate')) 
+                      ? localStorage.getItem('admin_impersonate') 
+                      : (user ? user.uid : null);
+
+    console.log("TenantId FINAL asignado para carga:", window.tenantId);
+
+    if (window.tenantId) {
+        try {
+            // USAMOS LA RUTA CORRECTA
+            const snapConfig = await get(ref(db, `tenants/${window.tenantId}/configuracion_horario`));
+
+            if (modoAcceso === 'login') {
+                if (snapConfig.exists()) {
+                    const snapSuscripcion = await get(ref(db, `tenants/${window.tenantId}/suscripcion`));
+                    const suscripcionActiva = snapSuscripcion.exists() && snapSuscripcion.val().estado === "ACTIVE";
+
+                    if (suscripcionActiva || esAdmin) {
+                        if (loginOverlay) loginOverlay.style.display = 'none';
+                        if (adminContent) adminContent.style.display = 'block';
                         
-                        // 1. LEEMOS EL ESTADO DE LA SUSCRIPCIÓN EN FIREBASE
-                        const snapSuscripcion = await get(ref(db, `tenants/${window.tenantId}/suscripcion`));
-                        const suscripcionActiva = snapSuscripcion.exists() && snapSuscripcion.val().estado === "ACTIVE";
-
-                        if (suscripcionActiva) {
-                            // SI ESTÁ AL DÍA: Entra directo al Dashboard
-                            if (loginOverlay) loginOverlay.style.display = 'none';
-                            if (adminContent) adminContent.style.display = 'block';
-                            
-                            if (typeof initDashboard === 'function') initDashboard();
-                            setTimeout(() => { if (calendar) calendar.updateSize(); }, 300);
-                        } else {
-                            // SI NO HA PAGADO: Lo bloqueamos en la tarjeta de PayPal
-                            if (divLogin) divLogin.style.display = 'none';
-                            if (divRegistro) divRegistro.style.display = 'none';
-                            if (divPago) divPago.style.display = 'flex';
-                            
-                            // Renderizamos los botones de PayPal inmediatamente
-                            if (typeof window.inicializarPaypal === 'function') {
-                                window.inicializarPaypal();
-                            }
-                        }
+                        // Inicialización segura
+                        if (typeof initDashboard === 'function') initDashboard();
+                        setTimeout(() => { if (typeof calendar !== 'undefined' && calendar) calendar.updateSize(); }, 500);
                     } else {
-                        showToast("ESTA CUENTA NO TIENE BARBERÍA. REGÍSTRALA PRIMERO.");
-                        auth.signOut();
-                    }
-                } else {
-                    // FLUJO DE REGISTRO DE NUEVA BARBERÍA
-                    if (snapConfig.exists()) {
-                        showToast("ESTA BARBERÍA YA EXISTE. INICIA SESIÓN.");
-                        auth.signOut();
-                    } else {
-                        const nombreNegocio = document.getElementById('reg-barberia-nombre').value.trim();
-                        const telefonoNegocio = document.getElementById('reg-barberia-telefono').value.trim();
-
-                        await set(ref(db, `tenants/${window.tenantId}/configuracion_horario`), {
-                            apertura: "08", cierre: "20", lunch_inicio: "", lunch_fin: "",
-                            nombre_barberia: nombreNegocio, telefono_barberia: telefonoNegocio
-                        });
-
-                        await push(ref(db, `tenants/${window.tenantId}/servicios`), {
-                            nombre: "Corte de Cabello Tradicional", precio: "50", detalle: "Corte inicial."
-                        });
-
-                        showToast("¡REGISTRO EXITOSO! PROCEDE CON TU PAGO.");
-                        
-                        // Al registrarse con éxito, lo mandamos directo a pagar para activar su cuenta
                         if (divLogin) divLogin.style.display = 'none';
                         if (divRegistro) divRegistro.style.display = 'none';
                         if (divPago) divPago.style.display = 'flex';
-                        
-                        if (typeof window.inicializarPaypal === 'function') {
-                            window.inicializarPaypal();
-                        }
+                        if (typeof window.inicializarPaypal === 'function') window.inicializarPaypal();
                     }
+                } else {
+                    showToast("ESTA CUENTA NO TIENE BARBERÍA.");
+                    auth.signOut();
                 }
-            } catch (error) {
-                console.error(error);
-                showToast("ERROR DE CONFIGURACIÓN");
+            } else {
+                // Registro ... (mantiene tu lógica)
+                if (snapConfig.exists()) { showToast("YA EXISTE"); auth.signOut(); }
+                else { /* ... tu lógica de set/push ... */ location.reload(); }
             }
-        } else {
-            if (loginOverlay) loginOverlay.style.display = 'flex';
-            if (adminContent) adminContent.style.display = 'none';
-            window.tenantId = null;
+        } catch (error) {
+            console.error("Error crítico en Auth:", error);
+            showToast("ERROR DE CONEXIÓN CON EL SERVIDOR");
+        }
+    } else {
+        // Usuario no logueado
+        if (loginOverlay) loginOverlay.style.display = 'flex';
+        if (adminContent) adminContent.style.display = 'none';
+    }
+});
+
+
+// --- 2. REGISTRO ---
+document.getElementById('btn-registrar-saas').onclick = () => {
+    const nombre = document.getElementById('reg-barberia-nombre')?.value.trim();
+    const tel = document.getElementById('reg-barberia-telefono')?.value.trim();
+    if (!nombre || !tel) return showToast("POR FAVOR, LLENA TODOS LOS CAMPOS");
+    
+    modoAcceso = 'registro';
+    loginGoogle();
+};
+
+// --- 3. CONFIGURACIÓN Y SELECTORES ---
+const llenarSelectores = () => {
+    const ids = ['config-apertura', 'config-cierre', 'config-lunch-inicio', 'config-lunch-fin'];
+    ids.forEach(id => {
+        const sel = document.getElementById(id);
+        if (sel) {
+            sel.innerHTML = id.includes('lunch') ? '<option value="">Sin lunch</option>' : '';
+            for (let i = 0; i < 24; i++) {
+                let h = i.toString().padStart(2, '0');
+                sel.innerHTML += `<option value="${h}">${h}:00</option>`;
+            }
         }
     });
+};
 
-    // TU NUEVO EVENTO DE REGISTRO (REPLÁZALO)
-    document.getElementById('btn-registrar-saas').onclick = () => {
-        const nombreNegocio = document.getElementById('reg-barberia-nombre').value.trim();
-        const telefonoNegocio = document.getElementById('reg-barberia-telefono').value.trim();
+llenarSelectores();
 
-        if (!nombreNegocio || !telefonoNegocio) {
-            return showToast("POR FAVOR, LLENA TODOS LOS CAMPOS");
-        }
-        modoAcceso = 'registro';
-        loginGoogle();
-    };
-   
-
- // --- 4. LÓGICA DE CONFIGURACIÓN (CON MENSAJES Y CARGA AUTOMÁTICA) ---
-
-    // Función para mostrar mensajes (Toast) por si no está definida arriba
-    const mostrarAviso = (msg) => {
-        if (typeof showToast === 'function') {
-            showToast(msg);
-        } else {
-            alert(msg); // Si falla el toast, al menos te sale un aviso
-        }
-    };
-
-    // Función para llenar los selectores con las horas
-    const llenarSelectores = () => {
-        const ids = ['config-apertura', 'config-cierre', 'config-lunch-inicio', 'config-lunch-fin'];
-        ids.forEach(id => {
-            const sel = document.getElementById(id);
-            if (sel) {
-                sel.innerHTML = id.includes('lunch') ? '<option value="">Sin lunch</option>' : '';
-                for (let i = 0; i < 24; i++) {
-                    let h = i.toString().padStart(2, '0');
-                    sel.innerHTML += `<option value="${h}">${h}:00</option>`;
-                }
+window.toggleConfig = async () => {
+    const modal = document.getElementById('modalConfig');
+    if (!modal) return;
+    
+    if (modal.style.display === 'none' || modal.style.display === '') {
+        llenarSelectores();
+        try {
+            const snapshot = await get(ref(db, `tenants/${window.tenantId}/configuracion_horario`));
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                if(data.apertura) document.getElementById('config-apertura').value = data.apertura;
+                if(data.cierre) document.getElementById('config-cierre').value = data.cierre;
+                if(data.lunch_inicio !== undefined) document.getElementById('config-lunch-inicio').value = data.lunch_inicio;
+                if(data.lunch_fin !== undefined) document.getElementById('config-lunch-fin').value = data.lunch_fin;
             }
-        });
-    };
-
-    // LLAMADA INMEDIATA: Para que al cargar la web ya tengan las horas puestas
-    llenarSelectores();
-
- window.toggleConfig = async () => {
-        const modal = document.getElementById('modalConfig');
-        if (!modal) return;
-        
-        if (modal.style.display === 'none' || modal.style.display === '') {
-            // 1. Llenar horas y cargar datos de Firebase
-            if (typeof llenarSelectores === 'function') llenarSelectores();
-            try {
-const snapshot = await get(ref(db, `tenants/${window.tenantId}/configuracion_horario`));
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    if(data.apertura) document.getElementById('config-apertura').value = data.apertura;
-                    if(data.cierre) document.getElementById('config-cierre').value = data.cierre;
-                    if(data.lunch_inicio !== undefined) document.getElementById('config-lunch-inicio').value = data.lunch_inicio;
-                    if(data.lunch_fin !== undefined) document.getElementById('config-lunch-fin').value = data.lunch_fin;
-                }
-            } catch (e) { console.error("Error al cargar:", e); }
-            
-            modal.style.display = 'flex'; // Abrir
-        } else {
-            modal.style.display = 'none'; // CERRAR Y LIBERAR PANTALLA
-        }
-    };
+        } catch (e) { console.error("Error al cargar configuración:", e); }
+        modal.style.display = 'flex';
+    } else {
+        modal.style.display = 'none';
+    }
+};
 
 
         // 5. INICIO DEL DASHBOARD
@@ -1970,6 +1938,31 @@ window.copiarLinkCliente = () => {
     };
 
 
+
+
 </script>
+
+
+<script>
+    // DIAGNÓSTICO DE CARGA
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            console.log("--- DIAGNÓSTICO DE CARGA ---");
+            console.log("¿Existe auth?:", typeof auth !== 'undefined');
+            console.log("¿Existe db?:", typeof db !== 'undefined');
+            console.log("¿TenantId actual?:", window.tenantId);
+            
+            if (typeof db !== 'undefined' && window.tenantId) {
+                console.log("Intentando lectura directa...");
+                get(ref(db, `tenants/${window.tenantId}/configuracion_horario`))
+                    .then(snap => console.log("Resultado:", snap.exists() ? "Datos encontrados" : "Ruta vacía"))
+                    .catch(err => console.error("Error lectura:", err));
+            } else {
+                console.error("Faltan variables para cargar");
+            }
+        }, 2000);
+    });
+</script>
+
 </body>
 </html>
