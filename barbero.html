@@ -97,6 +97,10 @@
             box-shadow: 0 0 40px rgba(212,175,55,0.05); 
         }
 
+        .oculto {
+    display: none !important;
+}
+
         /* ==========================================
            ESTRUCTURA DASHBOARD
            ========================================== */
@@ -462,6 +466,48 @@
     bottom: 40px; /* Sube elegantemente */
     opacity: 1;
 }
+
+.plan-toggle {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.plan-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(212,175,55,.25);
+    background: transparent;
+    color: #888;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .25s ease;
+}
+
+.plan-btn.active {
+    background: var(--gold);
+    color: #000;
+    border-color: var(--gold);
+}
+
+.plan-btn:hover {
+    border-color: var(--gold);
+}
+
+.plan-badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(212,175,55,.15);
+    color: var(--gold);
+    font-size: .65rem;
+    font-weight: 700;
+}
     </style>
 </head>
 <body>
@@ -479,7 +525,7 @@
                     <i class="fab fa-google" style="margin-right: 10px;"></i> ENTRAR CON GOOGLE
                 </button>
                 <p style="font-size: 0.7rem; color: #555; margin-top: 25px; text-transform: uppercase; letter-spacing: 1px;">
-                    ¿Nuevo en la plataforma? <a href="#" onclick="cambiarVistaAcceso('registro')" style="color: var(--gold); text-decoration: none; font-weight: 600;">Ver Planes y Registrarse</a>
+                  ¿Nuevo en la plataforma? <a href="javascript:void(0)" onclick="cambiarVistaAcceso('registro')" style="color: var(--gold); text-decoration: none; font-weight: 600;">Ver Planes y Registrarse</a>
                 </p>
             </div>
 
@@ -496,13 +542,14 @@
 
                 <input type="text" id="reg-barberia-nombre" placeholder="Nombre de tu Barbería" style="padding: 11px; border-radius: 12px; font-size: 0.8rem;">
                 <input type="tel" id="reg-barberia-telefono" placeholder="Teléfono de contacto" style="padding: 11px; border-radius: 12px; font-size: 0.8rem;">
+                <input type="email" id="reg-barberia-email" placeholder="Correo electrónico" style="padding: 11px; border-radius: 12px; font-size: 0.8rem;">
                 
                 <button class="btn btn-gold" id="btn-registrar-saas" style="margin-top: 5px; padding: 14px; font-size: 0.65rem;">
                     <i class="fab fa-google" style="margin-right: 8px;"></i> REGISTRAR Y PAGAR
                 </button>
                 
                 <p style="font-size: 0.7rem; color: #555; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px;">
-                    ¿Ya tienes cuenta? <a href="#" onclick="cambiarVistaAcceso('login')" style="color: var(--gold); text-decoration: none; font-weight: 600;">Iniciar Sesión</a>
+                  ¿Ya tienes cuenta? <a href="javascript:void(0)" onclick="cambiarVistaAcceso('login')" style="color: var(--gold); text-decoration: none; font-weight: 600;">Iniciar Sesión</a>
                 </p>
             </div>
 
@@ -516,36 +563,46 @@
                     <span id="txt-tipo-plan" style="font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Plan Mensual Elite</span>
                     <div id="txt-precio-plan" style="font-size: 1.6rem; font-weight: 600; color: var(--gold); margin-top: 5px;">$11.00 <span style="font-size: 0.7rem; color: #444;">/ mes</span></div>
                 </div>
+
+               <div class="plan-toggle">
+
+    <button id="pay-tab-mensual"
+        class="plan-btn active"
+        onclick="window.cambiarFrecuenciaPago('mensual')">
+        Mensual
+    </button>
+
+    <button id="pay-tab-anual"
+        class="plan-btn"
+        onclick="window.cambiarFrecuenciaPago('anual')">
+        Anual
+    </button>
+
+</div>
                 
-                <div id="paypal-button-container" style="width: 100%; min-height: 150px; z-index: 10;"></div>
-                
-            
-
-                <p style="font-size: 0.7rem; color: #555; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">
-                    ¿Usar otra cuenta? <a href="#" onclick="logout()" style="color: var(--red); text-decoration: none; font-weight: 600;">Cerrar Sesión</a>
-                </p>
-            </div>
 
 
+               <div id="paypal-button-container"
+     style="width:100%; min-height:150px; margin-top:15px;">
+</div>
 
+<button
+    onclick="window.contactarSoportePago()"
+    class="btn btn-outline"
+    style="
+        margin-top:10px;
+        border-color:#25D366;
+        color:#25D366;
+        font-weight:700;
+    ">
+    💸 Pagar por Transferencia
+</button>
 
-                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 15px; border-radius: 20px; width: 100%; margin-bottom: 20px; box-sizing: border-box; text-align: center;">
-                    <span id="txt-tipo-plan" style="font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Plan Mensual Elite</span>
-                    <div id="txt-precio-plan" style="font-size: 1.6rem; font-weight: 600; color: var(--gold); margin-top: 5px;">$11.00 <span style="font-size: 0.7rem; color: #444;">/ mes</span></div>
-                </div>
-                
-                <div id="paypal-button-container" style="width: 100%; min-height: 150px; z-index: 10;"></div>
-                
-                <p style="font-size: 0.7rem; color: #555; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">
-                    ¿Usar otra cuenta? <a href="#" onclick="logout()" style="color: var(--red); text-decoration: none; font-weight: 600;">Cerrar Sesión</a>
-                </p>
-            </div>
+<p style="font-size:.7rem; color:#666; text-align:center; margin-top:10px;">
+    Si no puedes pagar con PayPal, solicita los datos bancarios por WhatsApp.
+</p>
+            </div> </div> </div> <div id="admin-content">
         </div>
-
-    
-
-    <div id="admin-content">
-        
         <button class="btn-config-float" onclick="toggleConfig()">
             <i class="fas fa-sliders-h"></i>
         </button>
@@ -757,8 +814,13 @@
         onAuthStateChanged 
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    import { getDatabase, ref, set, onValue, push, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    import { getFirestore, collection, onSnapshot, query, where, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    // Importaciones de Realtime Database (CORREGIDAS)
+import { getDatabase, ref, set, onValue, push, remove, update, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+// Importaciones de Firestore
+import { getFirestore, collection, onSnapshot, query as queryFs, where, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    
+
 
     // 1. NUEVA CONFIGURACIÓN DE FIREBASE (STYLO SAAS)
     const firebaseConfig = {
@@ -771,152 +833,393 @@
     databaseURL: "https://stylo-app-9143d-default-rtdb.firebaseio.com" // <-- NECESARIA PARA LAS CITAS
 };
 
-    // 2. INICIALIZACIÓN EN EL ORDEN CORRECTO
-    const app = initializeApp(firebaseConfig);
+  const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
-    const fs = getFirestore(app);
+    const fs = getFirestore(app); // <--- ESTA LÍNEA ES LA QUE TE FALTA
     const provider = new GoogleAuthProvider();
-  
-    // --- VARIABLES GLOBALES (ADAPTADAS PARA SAAS) ---
-   window.tenantId = null;  // ID de la barbería activa (se asignará al iniciar sesión)
-    let calendar;
-    let selectedDateTime;
-    let currentEditingId;
-    let catalogoGlobal = {};
-    let fechaVisualizada = new Date().toISOString().split('T')[0];
-    let iti;
-    let fechaBloqueoParaBorrar = null;
 
-       // 3. FUNCIONES DE ACCESO
-    window.loginGoogle = () => {
-    signInWithRedirect(auth, provider); // Cambia Popup por Redirect
+    // HACER GLOBALES PARA QUE EL RESTO DEL CÓDIGO LAS VEA
+    window.fs = fs;       // Ahora sí existe fs
+    window.auth = auth;
+    window.db = db;
+    window.ref = ref;
+    window.set = set;
+    window.get = get;
+    window.update = update;
+    window.remove = remove;
+    window.push = push;
+    window.onValue = onValue;
+window.catalogoGlobal = {};
+window.tenantId = null;
+window.catalogoGlobal = {};
+window.fechaVisualizada = new Date().toISOString().split('T')[0]; // Fecha de hoy por defecto
+window.currentEditingId = null;
+window.selectedDateTime = null;
+window.calendar = null;
+
+    // --- 1. UTILIDAD GLOBAL ---
+window.showToast = (message) => {
+    let toast = document.getElementById('toast-aviso');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast-aviso';
+        document.body.appendChild(toast);
+    }
+    toast.innerHTML = `<i class="fas fa-check-circle"></i> <span>${message}</span>`;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
 };
 
-  // --- 3. FUNCIONES DE ACCESO (UNIFICADAS Y SIN DUPLICADOS) ---
-    getRedirectResult(auth).catch(err => console.error("Error redirect:", err));// --- 3. ACCESO UNIFICADO (IPHONE + DATOS) ---
-    getRedirectResult(auth).catch(err => console.error("Error redirect:", err));
+// --- 2. CONFIGURACIÓN Y ESTADO ---
+let modoAcceso = 'login'; 
+window.authReady = false;
 
-    
-
-   
-// Pega esto justo arriba de onAuthStateChanged
-    let modoAcceso = 'login'; 
-
-    window.cambiarVistaAcceso = (vista) => {
-        modoAcceso = vista;
-        const divLogin = document.getElementById('vista-login-saas');
-        const divRegistro = document.getElementById('vista-registro-saas');
-        if (vista === 'login') {
-            divLogin.style.display = 'block';
-            divRegistro.style.display = 'none';
-        } else {
-            divLogin.style.display = 'none';
-            divRegistro.style.display = 'flex';
-        }
-    };
-
-    window.manejarBotonLogin = () => {
-        modoAcceso = 'login';
-        loginGoogle();
-    };
-
- window.authReady = false;
-
-onAuthStateChanged(auth, async (user) => {
-    const loginOverlay = document.getElementById('login-overlay');
-    const adminContent = document.getElementById('admin-content');
+// --- 3. GESTIÓN DE VISTAS (LOGIN / REGISTRO) ---
+window.cambiarVistaAcceso = (vista) => {
+    modoAcceso = vista;
     const divLogin = document.getElementById('vista-login-saas');
     const divRegistro = document.getElementById('vista-registro-saas');
     const divPago = document.getElementById('vista-pago-saas');
-
-    // 1. Identificación
-    const esAdmin = (user && user.email === "antonydeleon13@gmail.com"); 
-    const idSuplantado = localStorage.getItem('admin_impersonate');
-
-    // 2. Asignación SEGURA: Si detectamos que somos admin, forzamos la lectura
-    // Si el ID es nulo y somos admin, esperamos 300ms por si el navegador está lento
-    if (esAdmin && !idSuplantado) {
-        console.warn("Admin detectado pero sin ID en localStorage, esperando...");
-        await new Promise(r => setTimeout(r, 300));
-    }
-
-    window.tenantId = (esAdmin && localStorage.getItem('admin_impersonate')) 
-                      ? localStorage.getItem('admin_impersonate') 
-                      : (user ? user.uid : null);
-
-    console.log("TenantId FINAL asignado para carga:", window.tenantId);
-
-    if (window.tenantId) {
-        try {
-            // USAMOS LA RUTA CORRECTA
-            const snapConfig = await get(ref(db, `tenants/${window.tenantId}/configuracion_horario`));
-
-            if (modoAcceso === 'login') {
-                if (snapConfig.exists()) {
-                    const snapSuscripcion = await get(ref(db, `tenants/${window.tenantId}/suscripcion`));
-                    const suscripcionActiva = snapSuscripcion.exists() && snapSuscripcion.val().estado === "ACTIVE";
-
-                    if (suscripcionActiva || esAdmin) {
-                        if (loginOverlay) loginOverlay.style.display = 'none';
-                        if (adminContent) adminContent.style.display = 'block';
-                        
-                        // Inicialización segura
-                        if (typeof initDashboard === 'function') initDashboard();
-                        setTimeout(() => { if (typeof calendar !== 'undefined' && calendar) calendar.updateSize(); }, 500);
-                    } else {
-                        if (divLogin) divLogin.style.display = 'none';
-                        if (divRegistro) divRegistro.style.display = 'none';
-                        if (divPago) divPago.style.display = 'flex';
-                        if (typeof window.inicializarPaypal === 'function') window.inicializarPaypal();
-                    }
-                } else {
-                    showToast("ESTA CUENTA NO TIENE BARBERÍA.");
-                    auth.signOut();
-                }
-            } else {
-                // Registro ... (mantiene tu lógica)
-                if (snapConfig.exists()) { showToast("YA EXISTE"); auth.signOut(); }
-                else { /* ... tu lógica de set/push ... */ location.reload(); }
-            }
-        } catch (error) {
-            console.error("Error crítico en Auth:", error);
-            showToast("ERROR DE CONEXIÓN CON EL SERVIDOR");
-        }
+    
+    if (vista === 'login') {
+        if(divLogin) divLogin.style.display = 'block';
+        if(divRegistro) divRegistro.style.display = 'none';
+        if(divPago) divPago.style.display = 'none';
     } else {
-        // Usuario no logueado
-        if (loginOverlay) loginOverlay.style.display = 'flex';
-        if (adminContent) adminContent.style.display = 'none';
+        if(divLogin) divLogin.style.display = 'none';
+        if(divRegistro) divRegistro.style.display = 'flex';
+        if(divPago) divPago.style.display = 'none';
+        window.seleccionarPlanRegistro('mensual');
+    }
+};
+
+
+// Asegúrate de que este nombre coincida con el onclick del botón
+window.manejarBotonLogin = async () => {
+    console.log("Intentando entrar con Google...");
+    try {
+        // Usamos Popup para evitar el bucle de redirección
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+        
+        // Al terminar, el onAuthStateChanged (que ya configuramos antes) 
+        // se encargará de ocultar el login y mostrar la app.
+    } catch (error) {
+        console.error("Error al iniciar sesión:", error);
+        window.showToast("Error al entrar: " + error.message);
+    }
+};
+
+// --- 4. LÓGICA DE AUTENTICACIÓN (ONAUTHSTATECHANGED) ---
+getRedirectResult(auth).catch(err => console.error("Error redirect:", err));
+
+
+const tenantSoporte = localStorage.getItem('admin_impersonate');
+
+if (tenantSoporte) {
+
+    console.log("🔧 MODO SOPORTE:", tenantSoporte);
+
+    window.tenantId = tenantSoporte;
+
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('admin-content').style.display = 'block';
+
+    requestAnimationFrame(() => {
+        initDashboard();
+        window.cargarDatosApp();
+    });
+
+    localStorage.removeItem('admin_impersonate');
+}
+
+
+onAuthStateChanged(auth, async (user) => {
+
+   if (window.tenantId && tenantSoporte) return;
+
+    if (user) {
+
+        const q = query(
+            ref(db, 'tenants'),
+            orderByChild('usuario_email'),
+            equalTo(user.email)
+        );
+
+        const snapshot = await get(q);
+
+        if (snapshot.exists()) {
+
+            let tenantData = null;
+
+            snapshot.forEach((child) => {
+                window.tenantId = child.key;
+                tenantData = child.val();
+            });
+
+            console.log("Tenant ID cargado:", window.tenantId);
+
+            const suscripcion = tenantData?.suscripcion || {};
+            const hoy = new Date();
+
+            // SI EL MASTER CORTÓ EL ACCESO
+            if (suscripcion.estado !== "ACTIVE") {
+
+    document.getElementById('login-overlay').style.display = 'flex';
+    document.getElementById('admin-content').style.display = 'none';
+
+    document.getElementById('vista-login-saas').style.display = 'none';
+    document.getElementById('vista-registro-saas').style.display = 'none';
+    document.getElementById('vista-pago-saas').style.display = 'flex';
+
+    // Inicializar PayPal nuevamente
+    setTimeout(() => {
+        const paypalDiv = document.getElementById('paypal-button-container');
+        if (paypalDiv) {
+            paypalDiv.innerHTML = '';
+            window.inicializarPaypal(true);
+        }
+    }, 300);
+
+    window.showToast(
+        "Tu suscripción está inactiva. Renueva tu plan para continuar."
+    );
+
+    return;
+}
+
+            // SI EL PLAN YA VENCIÓ
+            if (
+                suscripcion.fecha_vencimiento &&
+                new Date(suscripcion.fecha_vencimiento) < hoy
+            ) {
+
+                await update(
+                    ref(db, `tenants/${window.tenantId}/suscripcion`),
+                    {
+                        estado: "EXPIRED"
+                    }
+                );
+
+                document.getElementById('login-overlay').style.display = 'flex';
+                document.getElementById('admin-content').style.display = 'none';
+
+                document.getElementById('vista-login-saas').style.display = 'none';
+                document.getElementById('vista-registro-saas').style.display = 'none';
+                document.getElementById('vista-pago-saas').style.display = 'flex';
+
+                window.showToast(
+                    "Tu suscripción ha vencido. Renueva para recuperar el acceso."
+                );
+
+                return;
+            }
+
+            // ACCESO NORMAL
+            window.cargarDatosApp();
+
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('admin-content').style.display = 'block';
+
+            requestAnimationFrame(() => {
+                initDashboard();
+            });
+
+        } else {
+
+            await auth.signOut();
+
+            window.showToast(
+                "Este correo no tiene una cuenta registrada. Regístrate primero."
+            );
+
+        }
+
+    } else {
+
+        document.getElementById('login-overlay').style.display = 'flex';
+        document.getElementById('admin-content').style.display = 'none';
+
     }
 });
 
 
-// --- 2. REGISTRO ---
-document.getElementById('btn-registrar-saas').onclick = () => {
+
+
+
+
+// --- 5. PAYPAL Y SUSCRIPCIONES ---
+const PLAN_ID_MENSUAL = "P-6EJ59516PR580674ANIM2SHI";
+const PLAN_ID_ANUAL = "P-39D835942C773442YNIM26SQ";
+let frecuenciaSeleccionada = 'mensual';
+
+window.cambiarFrecuenciaPago = (frecuencia) => {
+
+    frecuenciaSeleccionada = frecuencia;
+
+    const txtTipo = document.getElementById('txt-tipo-plan');
+    const txtPrecio = document.getElementById('txt-precio-plan');
+
+    const btnMensual = document.getElementById('pay-tab-mensual');
+    const btnAnual = document.getElementById('pay-tab-anual');
+
+    if (frecuencia === 'mensual') {
+
+        txtTipo.innerText = "Plan Mensual Elite";
+        txtPrecio.innerHTML =
+            '$11.00 <span style="font-size:0.8rem;color:#444;">/ mes</span>';
+
+        if(btnMensual){
+            btnMensual.style.background = 'var(--gold)';
+            btnMensual.style.color = '#000';
+        }
+
+        if(btnAnual){
+            btnAnual.style.background = 'transparent';
+            btnAnual.style.color = '#777';
+        }
+
+    } else {
+
+        txtTipo.innerText = "Plan Anual Elite";
+        txtPrecio.innerHTML =
+            '$110.00 <span style="font-size:0.8rem;color:#444;">/ año</span>';
+
+        if(btnAnual){
+            btnAnual.style.background = 'var(--gold)';
+            btnAnual.style.color = '#000';
+        }
+
+        if(btnMensual){
+            btnMensual.style.background = 'transparent';
+            btnMensual.style.color = '#777';
+        }
+    }
+
+    window.inicializarPaypal(true);
+};
+
+window.inicializarPaypal = (forzarReinicio = false) => {
+    const contenedor = document.getElementById('paypal-button-container');
+    if (forzarReinicio) contenedor.innerHTML = "";
+    if (contenedor.innerHTML !== "") return;
+
+    paypal.Buttons({
+        style: { shape: 'pill', color: 'gold', layout: 'vertical', label: 'subscribe' },
+        createSubscription: (data, actions) => actions.subscription.create({ 'plan_id': frecuenciaSeleccionada === 'mensual' ? PLAN_ID_MENSUAL : PLAN_ID_ANUAL }),
+      onApprove: async (data) => {
+
+    const hoy = new Date();
+    const vencimiento = new Date();
+
+    if (frecuenciaSeleccionada === "anual") {
+        vencimiento.setFullYear(vencimiento.getFullYear() + 1);
+    } else {
+        vencimiento.setMonth(vencimiento.getMonth() + 1);
+    }
+
+    await set(ref(db, `tenants/${window.tenantId}/suscripcion`), {
+        subscriptionId: data.subscriptionID,
+        estado: "ACTIVE",
+        tipo_plan: frecuenciaSeleccionada,
+        fecha_activacion: hoy.toISOString(),
+        fecha_vencimiento: vencimiento.toISOString()
+    });
+
+    location.reload();
+}
+    }).render('#paypal-button-container');
+};
+
+window.seleccionarPlanRegistro = (frecuencia) => {
+
+    window.cambiarFrecuenciaPago(frecuencia);
+
+    const btnMensual = document.getElementById('reg-tab-mensual');
+    const btnAnual = document.getElementById('reg-tab-anual');
+
+    if (frecuencia === 'mensual') {
+
+        btnMensual.style.background = 'var(--gold)';
+        btnMensual.style.color = '#000';
+
+        btnAnual.style.background = 'transparent';
+        btnAnual.style.color = '#777';
+
+    } else {
+
+        btnAnual.style.background = 'var(--gold)';
+        btnAnual.style.color = '#000';
+
+        btnMensual.style.background = 'transparent';
+        btnMensual.style.color = '#777';
+
+    }
+
+    console.log("PLAN SELECCIONADO:", frecuencia);
+};
+
+window.simularAprobacionSaaS = async () => {
+    await set(ref(db, `tenants/${window.tenantId}/suscripcion`), { estado: "ACTIVE" });
+    location.reload();
+};
+
+
+   document.getElementById('btn-registrar-saas').onclick = async () => {
     const nombre = document.getElementById('reg-barberia-nombre')?.value.trim();
     const tel = document.getElementById('reg-barberia-telefono')?.value.trim();
-    if (!nombre || !tel) return showToast("POR FAVOR, LLENA TODOS LOS CAMPOS");
+    const email = document.getElementById('reg-barberia-email')?.value.trim();
     
-    modoAcceso = 'registro';
-    loginGoogle();
-};
+    if (!nombre || !tel || !email) {
+        window.showToast("LLENA TODOS LOS CAMPOS");
+        return;
+    }
 
-// --- 3. CONFIGURACIÓN Y SELECTORES ---
-const llenarSelectores = () => {
-    const ids = ['config-apertura', 'config-cierre', 'config-lunch-inicio', 'config-lunch-fin'];
-    ids.forEach(id => {
-        const sel = document.getElementById(id);
-        if (sel) {
-            sel.innerHTML = id.includes('lunch') ? '<option value="">Sin lunch</option>' : '';
-            for (let i = 0; i < 24; i++) {
-                let h = i.toString().padStart(2, '0');
-                sel.innerHTML += `<option value="${h}">${h}:00</option>`;
+    // 1. GENERAMOS UN ID NOSOTROS MISMOS, SIN DEPENDER DEL LOGIN
+    const idTemporal = "tenant_" + Date.now();
+
+    try {
+        // 2. GUARDAMOS DIRECTAMENTE EN FIREBASE
+        // Ya no dependemos de auth.currentUser.uid
+        await set(ref(db, `tenants/${idTemporal}`), { 
+            nombre_barberia: nombre,
+            contacto: tel,
+            usuario_email: email,
+            suscripcion: { 
+                estado: "PENDIENTE", 
+                tipo_plan: "mensual" 
+            }
+        });
+        
+        console.log("Datos guardados con ID:", idTemporal);
+        window.showToast("¡REGISTRO EXITOSO!");
+
+        // 3. CAMBIAR VISTA SIN REDIRECCIONES
+        const divRegistro = document.getElementById('vista-registro-saas');
+        const divPago = document.getElementById('vista-pago-saas');
+        
+        if (divRegistro) divRegistro.style.display = 'none';
+        if (divPago) {
+            divPago.style.display = 'flex';
+            // Aquí inicializas lo que necesites para el pago
+            if (typeof window.inicializarPaypal === 'function') {
+                window.inicializarPaypal();
             }
         }
-    });
-};
 
-llenarSelectores();
+    } catch (e) {
+        console.error("Error al guardar:", e);
+        window.showToast("ERROR: " + e.message);
+    }
+};  
+
+    console.log("✅ Firebase cargado y funciones expuestas a window");
+
+
+
+   
+
 
 window.toggleConfig = async () => {
     const modal = document.getElementById('modalConfig');
@@ -940,105 +1243,96 @@ window.toggleConfig = async () => {
     }
 };
 
+function initDashboard() {
+    // 1. ACTIVAR BANDERAS (ID corregido a 'add-whatsapp')
+    const inputTel = document.querySelector("#add-whatsapp"); 
+    if (inputTel) {
+        window.iti = window.intlTelInput(inputTel, { 
+            initialCountry: "gt", 
+            separateDialCode: true,
+            utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/utils.js"
+        });
+    }
 
-        // 5. INICIO DEL DASHBOARD
-        function initDashboard() {
-            // ACTIVAR BANDERAS
-            const inputTel = document.querySelector("#add-whatsapp-input");
-            if (inputTel) {
-                iti = window.intlTelInput(inputTel, { 
-                    initialCountry: "gt", 
-                    separateDialCode: true,
-                    utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/utils.js"
-                });
-            }
+    // 2. CONFIGURAR CALENDARIO
+    const calendarEl = document.getElementById('calendar');
+    if (!calendarEl) return;
 
-            // 2. CONFIGURAR CALENDARIO
-            const calendarEl = document.getElementById('calendar');
-            if (!calendarEl) return;
+    // Asignamos a la variable global sin 'const' ni 'let' para que sea visible fuera
+    window.calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'es',
+        dayMaxEvents: 2,
+        height: 650,
+        fixedWeekCount: false,
+        allDaySlot: false,
+        slotDuration: '00:30:00',
+        nowIndicator: true,
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        editable: true,
+        eventDurationEditable: false,
+        
+        eventDrop: function(info) {
+            actualizarHorarioCita(info.event);
+        },
+    
+        datesSet: function(info) {
+            window.fechaVisualizada = info.view.currentStart.toISOString().split('T')[0];
+            onValue(ref(db, `tenants/${window.tenantId}/citas`), (snapshot) => {
+                renderAdmin(snapshot.val());
+            }, { onlyOnce: true });
+        },
 
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'es',
-                dayMaxEvents: 2,
-                height: 650,
-                fixedWeekCount: false,
-                allDaySlot: false,
-                slotDuration: '00:30:00',
-                nowIndicator: true,
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                editable: true,
-                eventDurationEditable: false,
+        // --- CLIC EN UN DÍA ---
+        dateClick: function(info) {
+            if (info.view.type === 'dayGridMonth') {
+                window.fechaVisualizada = info.dateStr;
                 
-                eventDrop: function(info) {
-                    actualizarHorarioCita(info.event);
-                },
-            
-            datesSet: function(info) {
-                fechaVisualizada = info.view.currentStart.toISOString().split('T')[0];
-                // --- CAMBIO MULTI-TENANT: SOLO LEE LAS CITAS DE ESTA BARBERÍA ---
-                onValue(ref(db, `tenants/${window.tenantId}/citas`), (snapshot) => {
-                    renderAdmin(snapshot.val());
-                }, { onlyOnce: true });
-            },
+                const detalleDiv = document.getElementById('detalle-agenda-dia');
+                const listaDiv = document.getElementById('lista-citas');
+                const titulo = document.getElementById('titulo-agenda');
 
-            // --- CLIC EN UN DÍA (TU NUEVA AGENDA DE CINTAS ABAJO) ---
-            dateClick: function(info) {
-                if (info.view.type === 'dayGridMonth') {
-                    fechaVisualizada = info.dateStr;
-                    
-                    const detalleDiv = document.getElementById('detalle-agenda-dia');
-                    const listaDiv = document.getElementById('lista-citas');
-                    const titulo = document.getElementById('titulo-agenda');
+                // Usamos window.calendar aquí para acceder al calendario global
+                const eventos = window.calendar.getEvents().filter(e => {
+                    const mismaFecha = e.startStr.split('T')[0] === info.dateStr;
+                    const esPendiente = e.extendedProps && e.extendedProps.estado === "Pendiente";
+                    return mismaFecha && esPendiente;
+                });
 
-                    const eventos = calendar.getEvents().filter(e => {
-    const mismaFecha = e.startStr.split('T')[0] === info.dateStr;
-    const esPendiente = e.extendedProps.estado === "Pendiente"; // <--- ESTO FILTRA LAS FINALIZADAS
-    return mismaFecha && esPendiente;
-});
+                detalleDiv.style.display = 'block';
+                titulo.innerText = "CITAS DEL DÍA: " + info.dateStr.split('-').reverse().join('/');
+                listaDiv.innerHTML = "";
 
-                    detalleDiv.style.display = 'block';
-                    titulo.innerText = "CITAS DEL DÍA: " + info.dateStr.split('-').reverse().join('/');
-                    listaDiv.innerHTML = "";
-
-                    if (eventos.length === 0) {
-                        listaDiv.innerHTML = "<p style='color:#666; text-align:center; padding:20px; width:100%;'>No hay citas agendadas.</p>";
-                    } else {
-                        eventos.sort((a, b) => a.start - b.start).forEach(ev => {
-                            const meta = ev.extendedProps;
-                            const hora = ev.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                            
-                            const card = document.createElement('div');
-                            card.className = 'card'; 
-                            card.innerHTML = `
-                                <div style="flex:1; cursor:pointer;" onclick="abrirEventoDirecto('${ev.id}')">
-                                    <div style="font-size:0.6rem; color:var(--gold); font-weight:600; text-transform:uppercase; margin-bottom:2px;">
-                                        ${hora} - ${meta.servicio}
-                                    </div>
-                                    <h4 style="margin:0; font-size:0.85rem; letter-spacing:0.5px;">${meta.nombre}</h4>
-                                    ${meta.nota ? `<p style="margin:4px 0 0; font-size:0.65rem; color:#888; font-style:italic;">"${meta.nota}"</p>` : ""}
+                if (eventos.length === 0) {
+                    listaDiv.innerHTML = "<p style='color:#666; text-align:center; padding:20px; width:100%;'>No hay citas agendadas.</p>";
+                } else {
+                    eventos.sort((a, b) => a.start - b.start).forEach(ev => {
+                        const meta = ev.extendedProps;
+                        const hora = ev.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        
+                        const card = document.createElement('div');
+                        card.className = 'card'; 
+                        card.innerHTML = `
+                            <div style="flex:1; cursor:pointer;" onclick="abrirEventoDirecto('${ev.id}')">
+                                <div style="font-size:0.6rem; color:var(--gold); font-weight:600; text-transform:uppercase; margin-bottom:2px;">
+                                    ${hora} - ${meta.servicio}
                                 </div>
-                                <button class="btn-mini" onclick="cambiarEstado('${ev.id}','Finalizada')">
-                                    <i class="fas fa-check"></i> FIN
-                                </button>
-                            `;
-                            listaDiv.appendChild(card);
-                        });
-                    }
-                    
-                    detalleDiv.scrollIntoView({ behavior: 'smooth' });
-
-                    // --- CAMBIO MULTI-TENANT: ACTUALIZA EL NÚMERO DORADO SOLO CON LAS CITAS DE ESTA BARBERÍA ---
-                    onValue(ref(db, `tenants/${window.tenantId}/citas`), (snapshot) => {
-                        renderAdmin(snapshot.val());
-                    }, { onlyOnce: true });
-
+                                <h4 style="margin:0; font-size:0.85rem; letter-spacing:0.5px;">${meta.nombre}</h4>
+                            </div>
+                            <button class="btn-mini" onclick="cambiarEstado('${ev.id}','Finalizada')">
+                                <i class="fas fa-check"></i> FIN
+                            </button>
+                        `;
+                        listaDiv.appendChild(card);
+                    });
                 }
-            },
+                detalleDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+        },
             // --- SELECCIONAR HORA PARA NUEVA CITA ---
             selectable: true,
             select: function(info) {
@@ -1071,23 +1365,35 @@ window.toggleConfig = async () => {
                 ` + (meta.nota ? `<p style="font-size:0.8rem; color:#888; margin-top:15px; background:#111; padding:10px; border-radius:10px;">Nota: ${meta.nota}</p>` : "");
                 
                 document.getElementById('pop-whatsapp').onclick = function() {
-                    const num = meta.whatsapp.replace(/\D/g,'');
-                    const msg = encodeURIComponent('Hola ' + meta.nombre + ', te recordamos tu cita en Innovation Barber Studio para el ' + fTxt + '. ¡Te esperamos!');
-                    window.open('https://wa.me/' + num + '?text=' + msg);
-                };
-                
-                const fullWhatsapp = meta.whatsapp || "";
-                const codigos = ["502", "503", "504", "505", "506", "507", "52", "1"];
-                let encontrado = "502"; 
-                let numLimpio = fullWhatsapp;
+    const num = meta.whatsapp ? meta.whatsapp.replace(/\D/g, '') : "";
+    const nombreNegocio = window.nombreBarberia || "nuestra barbería";
+    
+    const msg = encodeURIComponent(
+        'Hola ' + meta.nombre +
+        ', te recordamos tu cita en ' + nombreNegocio +
+        ' el ' + fTxt +
+        '. Te esperamos. Si necesitas reprogramar tu cita, responde a este mensaje.'
+    );
 
-                for (let cod of codigos) {
-                    if (fullWhatsapp.startsWith(cod)) {
-                        encontrado = cod;
-                        numLimpio = fullWhatsapp.substring(cod.length); 
-                        break;
-                    }
-                }
+    if (num) {
+        window.open('https://wa.me/' + num + '?text=' + msg);
+    } else {
+        window.showToast("Error: El cliente no tiene un número válido.");
+    }
+};
+
+const fullWhatsapp = meta.whatsapp || "";
+const codigos = ["502", "503", "504", "505", "506", "507", "52", "1"];
+let encontrado = "502"; 
+let numLimpio = fullWhatsapp;
+
+for (let cod of codigos) {
+    if (fullWhatsapp.startsWith(cod)) {
+        encontrado = cod;
+        numLimpio = fullWhatsapp.substring(cod.length); 
+        break;
+    }
+}
 
                 document.getElementById('edit-nombre').value = meta.nombre;
                 document.getElementById('edit-codigo-area').value = encontrado;
@@ -1109,7 +1415,7 @@ window.toggleConfig = async () => {
             }
         });
 
-            calendar.render(); // Ahora sí, renderizamos
+           window.calendar.render(); // Ahora sí, renderizamos
 
           // --- SINCRONIZACIÓN DE HORARIOS (onValue) ---
 onValue(ref(db, 'configuracion_horario'), snap => { 
@@ -1136,42 +1442,47 @@ onValue(ref(db, 'configuracion_horario'), snap => {
 });
 
             // --- BOTÓN DE ACTUALIZAR CITA ---
-            document.getElementById('btn-update-cita').onclick = function() {
-                const servSelect = document.getElementById('edit-servicio-select');
-                const cod = document.getElementById('edit-codigo-area').value;
-                const num = document.getElementById('edit-whatsapp').value;
-                const whatsappCompleto = cod + num;
+           document.getElementById('btn-update-cita').onclick = function() {
+    const servSelect = document.getElementById('edit-servicio-select');
+    const cod = document.getElementById('edit-codigo-area').value;
+    const num = document.getElementById('edit-whatsapp').value;
+    const whatsappCompleto = cod + num;
 
-                const updateData = {
-                    nombre: document.getElementById('edit-nombre').value,
-                    whatsapp: whatsappCompleto,
-                    precio: document.getElementById('edit-precio').value,
-                    nota: document.getElementById('edit-nota').value
-                };
+    const updateData = {
+        nombre: document.getElementById('edit-nombre').value,
+        whatsapp: whatsappCompleto,
+        precio: document.getElementById('edit-precio').value,
+        nota: document.getElementById('edit-nota').value
+    };
 
-                if(servSelect && servSelect.value) {
-                    updateData.servicio = catalogoGlobal[servSelect.value].nombre;
-                    updateData.precio = catalogoGlobal[servSelect.value].precio;
-                }
+    // CORRECCIÓN: Uso de window.catalogoGlobal con validación
+    if(servSelect && servSelect.value && window.catalogoGlobal && window.catalogoGlobal[servSelect.value]) {
+        updateData.servicio = window.catalogoGlobal[servSelect.value].nombre;
+        updateData.precio = window.catalogoGlobal[servSelect.value].precio;
+    }
 
-                update(ref(db, 'citas/' + currentEditingId), updateData).then(() => { 
-                    showToast("CITA ACTUALIZADA"); 
-                    cerrarPop(); 
-                });
-            };
-            // SINCRONIZACIÓN DE CITAS (TIEMPO REAL)
-            onValue(ref(db, 'citas'), (snapshot) => {
-                renderAdmin(snapshot.val());
-            });
+    // CORRECCIÓN: Ruta apuntando al ID del barbero logueado
+    update(ref(db, `tenants/${window.tenantId}/citas/${currentEditingId}`), updateData).then(() => { 
+        showToast("CITA ACTUALIZADA"); 
+        cerrarPop(); 
+    });
+};
 
-            // SINCRONIZACIÓN DE CATÁLOGO
-            onValue(ref(db, 'servicios'), (snapshot) => {
-                renderServicios(snapshot.val() || {});
-            });
+// SINCRONIZACIÓN DE CITAS (TIEMPO REAL MULTI-TENANT)
+onValue(ref(db, `tenants/${window.tenantId}/citas`), (snapshot) => {
+    renderAdmin(snapshot.val());
+});
+
+// SINCRONIZACIÓN DE CATÁLOGO (MULTI-TENANT)
+onValue(ref(db, `tenants/${window.tenantId}/servicios`), (snapshot) => {
+    renderServicios(snapshot.val() || {});
+});
         }
 
-        // --- RENDERIZADO MAESTRO DE DATOS ---
        function renderAdmin(data) {
+    // 1. Usamos la variable global de forma segura
+    const fechaActual = window.fechaVisualizada || new Date().toISOString().split('T')[0];
+    
     const lista = document.getElementById('lista-citas');
     const cCount = document.getElementById('citas-count');
     const iTotal = document.getElementById('ingreso-total');
@@ -1179,6 +1490,9 @@ onValue(ref(db, 'configuracion_horario'), snap => {
     const pLabel = document.getElementById('label-pendientes');
     const desglose = document.getElementById('desglose-servicios');
     
+    // Verificamos que los elementos existan
+    if(!lista || !cCount) return; 
+
     lista.innerHTML = ''; 
     desglose.innerHTML = '';
     
@@ -1188,9 +1502,8 @@ onValue(ref(db, 'configuracion_horario'), snap => {
     let eventosCalendar = [];
     let contadorServicios = {};
 
-    // --- CORRECCIÓN DE MES DINÁMICO ---
-    // Extraemos mes y año de la fecha que está viendo el usuario en el calendario
-    const fechaReferencia = new Date(fechaVisualizada + "T12:00:00");
+    // --- MES DINÁMICO ---
+    const fechaReferencia = new Date(fechaActual + "T12:00:00");
     const mesEnPantalla = fechaReferencia.getMonth();
     const añoEnPantalla = fechaReferencia.getFullYear();
 
@@ -1198,7 +1511,7 @@ onValue(ref(db, 'configuracion_horario'), snap => {
     const hoyRealIso = ahoraHoy.toISOString().split('T')[0];
 
     // Actualizar etiqueta del contador dorado
-    if (fechaVisualizada === hoyRealIso) {
+    if (fechaActual === hoyRealIso) {
         pLabel.innerText = "Pendientes Hoy";
     } else {
         const opciones = { day: 'numeric', month: 'short' };
@@ -1207,7 +1520,6 @@ onValue(ref(db, 'configuracion_horario'), snap => {
     }
 
     if(data){
-        // --- 1. ORDENAMIENTO POR HORA ---
         const listaOrdenada = Object.keys(data).map(id => ({
             id: id,
             ...data[id]
@@ -1216,7 +1528,6 @@ onValue(ref(db, 'configuracion_horario'), snap => {
             return a.fecha.localeCompare(b.fecha);
         });
 
-        // --- 2. PROCESAMIENTO DE CITAS ---
         listaOrdenada.forEach(cita => {
             const id = cita.id;
             if (!cita.fecha) return;
@@ -1226,7 +1537,6 @@ onValue(ref(db, 'configuracion_horario'), snap => {
             const fechaLimpia = cita.fecha.split('T')[0];
             const fCita = new Date(fechaLimpia + "T12:00:00");
 
-            // MÉTRICAS BASADAS EN EL MES QUE ESTÁS VIENDO
             if(esFinalizada && fCita.getMonth() === mesEnPantalla && fCita.getFullYear() === añoEnPantalla) { 
                 finalizadosMes++; 
                 ingresosMes += parseFloat(cita.precio || 0); 
@@ -1235,12 +1545,10 @@ onValue(ref(db, 'configuracion_horario'), snap => {
                 }
             }
 
-            // PENDIENTES DEL DÍA SELECCIONADO
-            if (esPendiente && fechaLimpia === fechaVisualizada) {
+            if (esPendiente && fechaLimpia === fechaActual) {
                 pendientesDiaEnPantalla++;
             }
 
-            // EVENTOS DEL CALENDARIO
             eventosCalendar.push({ 
                 id: id, 
                 title: cita.nombre, 
@@ -1251,13 +1559,10 @@ onValue(ref(db, 'configuracion_horario'), snap => {
                 extendedProps: { ...cita } 
             });
             
-            // TARJETAS (CINTAS) EN ORDEN (MODIFICADO)
-            if (esPendiente && fechaLimpia === fechaVisualizada){
+            if (esPendiente && fechaLimpia === fechaActual){
                 const card = document.createElement('div');
                 card.className = 'card';
-                // Hacemos que toda la tarjeta parezca cliqueable
                 card.style.cursor = "pointer"; 
-                
                 card.innerHTML = `
                     <div style="flex:1" onclick="abrirEventoDirecto('${id}')">
                         <div style="font-size:0.6rem; color:var(--gold); font-weight:600; text-transform:uppercase; margin-bottom:2px;">
@@ -1275,7 +1580,7 @@ onValue(ref(db, 'configuracion_horario'), snap => {
         });
     }
 
-    // ACTUALIZACIÓN DE LA INTERFAZ
+  // ACTUALIZACIÓN DE LA INTERFAZ
     Object.keys(contadorServicios).forEach(serv => {
         desglose.innerHTML += `<div class="serv-stat-item"><span>${serv}</span><span>x${contadorServicios[serv]}</span></div>`;
     });
@@ -1284,22 +1589,28 @@ onValue(ref(db, 'configuracion_horario'), snap => {
     iTotal.innerText = 'Q' + ingresosMes.toLocaleString('es-GT', { minimumFractionDigits: 2 });
     pCount.innerText = pendientesDiaEnPantalla;
 
-    calendar.removeAllEvents();
-    calendar.addEventSource(eventosCalendar);
-}
+    // --- CORRECCIÓN DEFINITIVA ---
+    // Verificamos que 'calendar' (o 'window.calendar') exista y tenga el método esperado
+    if (typeof window.calendar !== 'undefined' && window.calendar !== null && typeof window.calendar.removeAllEvents === 'function') {
+        window.calendar.removeAllEvents();
+        window.calendar.addEventSource(eventosCalendar);
+    } else {
+        console.warn("El calendario aún no está inicializado, esperando...");
+    }
+}   
 
-        // --- FUNCIONES DE EDICIÓN ---
-        window.entrarModoEdicion = function() { 
-            document.getElementById('view-mode').style.display = 'none'; 
-            document.getElementById('edit-mode').style.display = 'block'; 
-        };
+// --- FUNCIONES DE EDICIÓN ---
+window.entrarModoEdicion = function() { 
+    document.getElementById('view-mode').style.display = 'none'; 
+    document.getElementById('edit-mode').style.display = 'block'; 
+};
 
-        window.salirModoEdicion = function() { 
-            document.getElementById('view-mode').style.display = 'block'; 
-            document.getElementById('edit-mode').style.display = 'none'; 
-        };
+window.salirModoEdicion = function() { 
+    document.getElementById('view-mode').style.display = 'block'; 
+    document.getElementById('edit-mode').style.display = 'none'; 
+};
 
-        document.getElementById('btn-update-cita').onclick = function() {
+document.getElementById('btn-update-cita').onclick = function() {
     const servSelect = document.getElementById('edit-servicio-select');
     
     // CAPTURAMOS AMBOS CAMPOS Y LOS UNIMOS
@@ -1309,18 +1620,19 @@ onValue(ref(db, 'configuracion_horario'), snap => {
 
     const updateData = {
         nombre: document.getElementById('edit-nombre').value,
-        whatsapp: whatsappCompleto, // Guardamos la unión de código + número
+        whatsapp: whatsappCompleto,
         precio: document.getElementById('edit-precio').value,
         nota: document.getElementById('edit-nota').value
     };
 
-    // Si se seleccionó un nuevo servicio del catálogo, actualizar nombre y precio
-    if(servSelect.value) {
-        updateData.servicio = catalogoGlobal[servSelect.value].nombre;
-        updateData.precio = catalogoGlobal[servSelect.value].precio;
+    // CORRECCIÓN: Uso de window.catalogoGlobal y validación
+    if(servSelect && servSelect.value && window.catalogoGlobal && window.catalogoGlobal[servSelect.value]) {
+        updateData.servicio = window.catalogoGlobal[servSelect.value].nombre;
+        updateData.precio = window.catalogoGlobal[servSelect.value].precio;
     }
 
-    update(ref(db, 'citas/' + currentEditingId), updateData).then(() => { 
+    // CORRECCIÓN: Ruta multi-tenant
+    update(ref(db, `tenants/${window.tenantId}/citas/${currentEditingId}`), updateData).then(() => { 
         showToast("CITA ACTUALIZADA"); 
         cerrarPop(); 
     });
@@ -1399,7 +1711,7 @@ document.getElementById('confirm-yes').onclick = function() {
 
         // --- GESTIÓN DE SERVICIOS (CATÁLOGO) ---
         function renderServicios(servs) {
-    catalogoGlobal = servs;
+    window.catalogoGlobal = servs;
     const selAdd = document.getElementById('add-servicio-select');
     const selEdit = document.getElementById('edit-servicio-select');
     const listaAdmin = document.getElementById('lista-servicios-admin');
@@ -1451,7 +1763,7 @@ document.getElementById('confirm-yes').onclick = function() {
 let idServicioEnEdicion = null; 
 
 window.prepararEdicionServicio = function(id) {
-    const s = catalogoGlobal[id];
+   const s = window.catalogoGlobal[id];
     idServicioEnEdicion = id; // Aquí guardamos el ID para que el botón sepa qué editar
     
     document.getElementById('serv-n').value = s.nombre;
@@ -1570,7 +1882,7 @@ document.getElementById('btn-add-block').onclick = () => {
         showToast("SELECCIONA UNA FECHA"); //
     }
 };
-        // ... (todo tu código anterior de botones y bloqueos)
+
 
         // --- FUNCIÓN PARA MOVER CITAS (DRAG & DROP MULTI-TENANT) ---
         function actualizarHorarioCita(event) {
@@ -1636,29 +1948,7 @@ document.getElementById('add-nombre').addEventListener('input', async (e) => {
     });
 });
 
-// --- BLOQUE FINAL DE SEGURIDAD ---
 
-window.showToast = (message) => {
-    let toast = document.getElementById('toast-aviso');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'toast-aviso';
-        document.body.appendChild(toast);
-    }
-    
-    // Icono y mensaje
-    toast.innerHTML = `<i class="fas fa-check-circle"></i> <span>${message}</span>`;
-    
-    // Activamos la animación de subida
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 100);
-
-    // Lo bajamos y ocultamos tras 3 segundos
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 3000);
-};
 
 // 2. Definición de carga de horas con nombre blindado (para evitar el "already declared")
 const f_CargarHorarios_Final = () => {
@@ -1701,37 +1991,43 @@ window.toggleConfig = async () => {
 };
 
 document.getElementById('btn-save-cita-calendar').onclick = function() {
-    const nombre = document.getElementById('add-nombre').value; //
-    const sKey = document.getElementById('add-servicio-select').value; //
-    const codArea = document.getElementById('add-codigo-area').value; //
-    const numTel = document.getElementById('add-whatsapp').value; //
-    const nota = document.getElementById('add-nota').value; //
+    const nombre = document.getElementById('add-nombre').value;
+    const sKey = document.getElementById('add-servicio-select').value;
+    const codArea = document.getElementById('add-codigo-area').value;
+    const numTel = document.getElementById('add-whatsapp').value;
+    const nota = document.getElementById('add-nota').value;
 
-    if(!nombre || !sKey || !numTel) { //
-        return showToast("FALTA NOMBRE, SERVICIO O WHATSAPP"); //
+    // Validación básica
+    if(!nombre || !sKey || !numTel) {
+        return showToast("FALTA NOMBRE, SERVICIO O WHATSAPP");
     }
 
-    const servicio = catalogoGlobal[sKey]; //
-    const whatsappCompleto = codArea + numTel; //
+    // CORRECCIÓN: Uso de window.catalogoGlobal y validación de existencia
+    const servicio = window.catalogoGlobal ? window.catalogoGlobal[sKey] : null;
+    if (!servicio) {
+        return showToast("ERROR: SERVICIO NO ENCONTRADO");
+    }
+    
+    const whatsappCompleto = codArea + numTel;
 
-    const nuevaCita = { //
-        nombre: nombre, //
-        whatsapp: whatsappCompleto, //
-        servicio: servicio.nombre, //
-        precio: servicio.precio, //
-        fecha: selectedDateTime, //
-        estado: "Pendiente", //
-        nota: nota //
-    }; //
+    const nuevaCita = {
+        nombre: nombre,
+        whatsapp: whatsappCompleto,
+        servicio: servicio.nombre,
+        precio: servicio.precio,
+        fecha: selectedDateTime,
+        estado: "Pendiente",
+        nota: nota
+    };
 
-    // --- CAMBIO MULTI-TENANT: GUARDAMOS EN LA CARPETA EXCLUSIVA DEL BARBERO ---
+    // CORRECCIÓN: Ruta multi-tenant usando window.tenantId
     push(ref(db, `tenants/${window.tenantId}/citas`), nuevaCita).then(() => {
-        cerrarModalAdd(); //
-        showToast("CITA AGENDADA CON ÉXITO"); //
-    }).catch(err => { //
-        console.error("Error:", err); //
-        showToast("ERROR AL GUARDAR"); //
-    }); //
+        cerrarModalAdd();
+        showToast("CITA AGENDADA CON ÉXITO");
+    }).catch(err => {
+        console.error("Error:", err);
+        showToast("ERROR AL GUARDAR");
+    });
 };
 
 // --- LÓGICA PARA EL BOTÓN DE ACTUALIZAR HORARIOS (MIGRADO A MULTI-TENANT) ---
@@ -1781,7 +2077,7 @@ window.copiarLinkCliente = () => {
         return showToast("ERROR: NO SE DETECTÓ TU SESIÓN ACTIVA"); //
     }
 
-    const linkPersonalizado = `http://127.0.0.1:5500/cliente.html?id=${window.tenantId}`; //
+    const linkPersonalizado = `https://stylobarber.com/cliente?id=${window.tenantId}`;
 
     navigator.clipboard.writeText(linkPersonalizado) //
         .then(() => { //
@@ -1794,174 +2090,56 @@ window.copiarLinkCliente = () => {
 };
 
 
-// --- LÓGICA DE SUSCRIPCIÓN COMPLETA (PAYPAL SAAS) ---
-    const PLAN_ID_MENSUAL = "P-6EJ59516PR580674ANIM2SHI"; // Tu ID mensual activo
-    const PLAN_ID_ANUAL = "P-39D835942C773442YNIM26SQ";
 
-    let frecuenciaSeleccionada = 'mensual';
+// --- FUNCIÓN MAESTRA QUE CARGA TODO LO DEL TENANT ---
+window.cargarDatosApp = () => {
+    if (!window.tenantId) return;
+    
+    console.log("Cargando datos para el tenant:", window.tenantId);
 
-    window.cambiarFrecuenciaPago = (frecuencia) => {
-        if(frecuenciaSeleccionada === frecuencia) return;
-        frecuenciaSeleccionada = frecuencia;
-
-        const tabMensual = document.getElementById('tab-mensual');
-        const tabAnual = document.getElementById('tab-anual');
-        const txtTipo = document.getElementById('txt-tipo-plan');
-        const txtPrecio = document.getElementById('txt-precio-plan');
-
-        // --- CANDADO DE SEGURIDAD PARA LA PANTALLA DE REGISTRO ---
-        // Solo aplica estilos si los elementos de la vista de pago existen en el DOM
-        if (tabMensual && tabAnual) {
-            if(frecuencia === 'mensual') {
-                tabMensual.style.background = 'var(--gold)';
-                tabMensual.style.color = '#000';
-                tabAnual.style.background = 'transparent';
-                tabAnual.style.color = '#777';
-            } else {
-                tabAnual.style.background = 'var(--gold)';
-                tabAnual.style.color = '#000';
-                tabMensual.style.background = 'transparent';
-                tabMensual.style.color = '#777';
-            }
+    // NUEVO: Obtener el nombre de la barbería una sola vez al cargar
+    get(ref(db, `tenants/${window.tenantId}`)).then((snapshot) => {
+        if (snapshot.exists()) {
+            window.nombreBarberia = snapshot.val().nombre_barberia || "nuestra barbería";
         }
-
-        // Actualiza los textos informativos si están disponibles
-        if (txtTipo && txtPrecio) {
-            if(frecuencia === 'mensual') {
-                txtTipo.innerText = "Plan Mensual Elite";
-                txtPrecio.innerHTML = `$11.00 <span style="font-size: 0.8rem; color: #444;">/ mes</span>`;
-            } else {
-                txtTipo.innerText = "Plan Anual Elite (Ahorra 15%)";
-                txtPrecio.innerHTML = `$110.00 <span style="font-size: 0.8rem; color: #444;">/ año</span>`;
-            }
-        }
-        
-        window.inicializarPaypal(true);
-    };
-
-
-    window.inicializarPaypal = (forzarReinicio = false) => {
-        const contenedor = document.getElementById('paypal-button-container');
-        if (forzarReinicio) contenedor.innerHTML = "";
-        else if (contenedor.innerHTML !== "") return;
-
-        const planIdActivo = (frecuenciaSeleccionada === 'mensual') ? PLAN_ID_MENSUAL : PLAN_ID_ANUAL;
-
-        paypal.Buttons({
-            style: { shape: 'pill', color: 'gold', layout: 'vertical', label: 'subscribe' },
-            createSubscription: function(data, actions) {
-                return actions.subscription.create({ 'plan_id': planIdActivo });
-            },
-            onApprove: async function(data, actions) {
-                showToast("¡PAGO COMPLETADO CON ÉXITO!");
-                
-                // Guardamos el estado ACTIVE en la base de datos para habilitar el dashboard
-                await set(ref(db, `tenants/${window.tenantId}/suscripcion`), {
-                    subscriptionId: data.subscriptionId || data.subscriptionID,
-                    estado: "ACTIVE",
-                    tipo_plan: frecuenciaSeleccionada,
-                    fecha_activacion: new Date().toISOString()
-                });
-                
-                location.reload();
-            },
-            onError: function(err) {
-                console.error("Error pasarela PayPal:", err);
-                showToast("EL PAGO NO PUDO PROCESARSE");
-            }
-        }).render('#paypal-button-container');
-    };
-
-    // Sincroniza la pestaña elegida en el registro con la variable global de PayPal
-    window.seleccionarPlanRegistro = (frecuencia) => {
-        // Ejecutamos la función original de PayPal para cambiar los textos del contenedor final
-        window.cambiarFrecuenciaPago(frecuencia);
-        
-        // Estilizados los botones espejo de la pantalla de registro
-        const regTabMensual = document.getElementById('reg-tab-mensual');
-        const regTabAnual = document.getElementById('reg-tab-anual');
-        
-        if (frecuencia === 'mensual') {
-            regTabMensual.style.background = 'var(--gold)';
-            regTabMensual.style.color = '#000';
-            regTabAnual.style.background = 'transparent';
-            regTabAnual.style.color = '#777';
-        } else {
-            regTabAnual.style.background = 'var(--gold)';
-            regTabAnual.style.color = '#000';
-            regTabMensual.style.background = 'transparent';
-            regTabMensual.style.color = '#777';
-        }
-    };
-
-    // Ajustamos este controlador para resetear el selector visual al alternar pestañas
-    window.cambiarVistaAcceso = (vista) => {
-        modoAcceso = vista;
-        const divLogin = document.getElementById('vista-login-saas');
-        const divRegistro = document.getElementById('vista-registro-saas');
-        const divPago = document.getElementById('vista-pago-saas');
-        
-        if (vista === 'login') {
-            divLogin.style.display = 'block';
-            divRegistro.style.display = 'none';
-            divPago.style.display = 'none';
-        } else {
-            divLogin.style.display = 'none';
-            divRegistro.style.display = 'flex';
-            divPago.style.display = 'none';
-            // Por defecto arranca mostrando el mensual seleccionado visualmente
-            window.seleccionarPlanRegistro('mensual');
-        }
-    };
-
-
-// --- FUNCIÓN TEMPORAL DE DESARROLLO PARA AGILIZAR PRUEBAS ---
-    window.simularAprobacionSaaS = async () => {
-        showToast("PROCESANDO SUSCRIPCIÓN SIMULADA...");
-        
-        try {
-            // Escribe la estructura exacta que tu onAuthStateChanged espera leer para dar acceso
-            await set(ref(db, `tenants/${window.tenantId}/suscripcion`), {
-                subscriptionId: "SUBS-SANDBOX-" + Math.random().toString(36).substr(2, 9).toUpperCase(),
-                estado: "ACTIVE",
-                tipo_plan: "anual",
-                fecha_activacion: new Date().toISOString()
-            });
-            
-            showToast("¡PLAN ANUAL ACTIVADO CON ÉXITO!");
-            setTimeout(() => { location.reload(); }, 1500); // Refresca para romper el candado visual
-            
-        } catch (error) {
-            console.error("Error al simular pago:", error);
-            showToast("ERROR DE CONEXIÓN CON FIREBASE");
-        }
-    };
-
-
-
-
-</script>
-
-
-<script>
-    // DIAGNÓSTICO DE CARGA
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            console.log("--- DIAGNÓSTICO DE CARGA ---");
-            console.log("¿Existe auth?:", typeof auth !== 'undefined');
-            console.log("¿Existe db?:", typeof db !== 'undefined');
-            console.log("¿TenantId actual?:", window.tenantId);
-            
-            if (typeof db !== 'undefined' && window.tenantId) {
-                console.log("Intentando lectura directa...");
-                get(ref(db, `tenants/${window.tenantId}/configuracion_horario`))
-                    .then(snap => console.log("Resultado:", snap.exists() ? "Datos encontrados" : "Ruta vacía"))
-                    .catch(err => console.error("Error lectura:", err));
-            } else {
-                console.error("Faltan variables para cargar");
-            }
-        }, 2000);
     });
+
+    // 1. Cargar Citas
+    onValue(ref(db, `tenants/${window.tenantId}/citas`), (snapshot) => {
+        console.log("Citas recibidas:", snapshot.val());
+        renderAdmin(snapshot.val());
+    });
+
+    // 2. Cargar Servicios
+    onValue(ref(db, `tenants/${window.tenantId}/servicios`), (snapshot) => {
+        renderServicios(snapshot.val() || {});
+    });
+
+    // 3. Cargar Configuración
+    onValue(ref(db, `tenants/${window.tenantId}/configuracion_horario`), (snap) => {
+        const config = snap.val();
+        if(config && window.calendar){ // Usamos window.calendar por seguridad
+            window.calendar.setOption('slotMinTime', config.apertura.padStart(2,'0')+':00:00');
+            window.calendar.setOption('slotMaxTime', config.cierre.padStart(2,'0')+':00:00');
+        }
+    });
+};
+
+
+window.contactarSoportePago = () => {
+
+    const mensaje =
+        "Hola, deseo activar mi suscripción mediante transferencia bancaria. ¿Podrían enviarme los datos de pago?";
+
+    window.open(
+        "https://wa.me/50257154704?text=" +
+        encodeURIComponent(mensaje),
+        "_blank"
+    );
+};
+
+
+
 </script>
 
 </body>
