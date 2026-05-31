@@ -155,7 +155,10 @@
                 <i class="fas fa-check" style="font-size:2rem; color:var(--gold);"></i>
             </div>
             <h2 style="color:var(--gold); margin:0; letter-spacing:2px; font-size:1.5rem;">¡CONFIRMADO!</h2>
-            <p style="color:#aaa; font-size:0.85rem; margin:15px 0 25px;">Tu reserva ha sido procesada. Recibirás un mensaje en breve.</p>
+            <p id="texto-confirmacion"
+   style="color:#aaa; font-size:0.85rem; margin:15px 0 25px;">
+   Tu reserva ha sido procesada.
+</p>
             <button class="btn-reserva" onclick="location.reload()">FINALIZAR</button>
         </div>
     </div>
@@ -208,14 +211,31 @@
         }
 
         // --- ASIGNAR DINÁMICAMENTE EL NOMBRE DE LA BARBERÍA EN LA INTERFAZ ---
-        get(ref(db, `tenants/${currentTenantId}/configuracion_horario`)).then((snapshot) => {
-            if (snapshot.exists() && snapshot.val().nombre_barberia) {
-                document.querySelector("h1").innerText = snapshot.val().nombre_barberia;
-                document.title = `${snapshot.val().nombre_barberia} | Elite Booking`;
-            } else {
-                document.querySelector("h1").innerText = "INNOVATION BARBER STUDIO";
-            }
-        }).catch(err => console.error("Error al cargar nombre comercial:", err));
+       get(ref(db, `tenants/${currentTenantId}`)).then((snapshot) => {
+
+    if (snapshot.exists()) {
+
+        const tenant = snapshot.val();
+
+        document.querySelector("h1").innerText =
+            tenant.nombre_barberia || "Stylo Barber Studio";
+
+        document.title =
+            `${tenant.nombre_barberia || "Stylo Barber Studio"} | Elite Booking`;
+
+        const textoConfirmacion =
+            document.getElementById('texto-confirmacion');
+
+        if (textoConfirmacion) {
+            textoConfirmacion.innerText =
+                `Tu reserva en ${tenant.nombre_barberia} ha sido procesada correctamente.`;
+        }
+
+    }
+
+}).catch(err => {
+    console.error("Error al cargar nombre comercial:", err);
+});
 
         let ocupados = [], fechaSeleccionada = "", horaSeleccionada = "", fp;
         let horaApertura = 7, horaCierre = 21, lunchInicio = -1, lunchFin = -1;
