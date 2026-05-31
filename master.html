@@ -25,10 +25,53 @@
         .badge-expired { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
         .badge-none { background: rgba(255,255,255,0.05); color: #777; }
         .btn-group { display: flex; gap: 8px; }
-        .btn-action { background: #000; border: 1px solid var(--border); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; cursor: pointer; font-weight: 600; text-transform: uppercase; transition: all 0.3s; }
-        .btn-mensual:hover { background: var(--gold); color: #000; border-color: var(--gold); }
-        .btn-anual:hover { background: #2ecc71; color: #000; border-color: #2ecc71; }
-        .btn-cut:hover { background: #e74c3c; color: #fff; border-color: #e74c3c; }
+      .btn-action {
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    font-weight: 700;
+    text-transform: uppercase;
+    transition: all 0.25s ease;
+    border: none;
+}
+
+.btn-mensual {
+    background: linear-gradient(135deg, #d4af37, #f7d85a);
+    color: #000;
+    box-shadow: 0 3px 10px rgba(212,175,55,0.25);
+}
+
+.btn-mensual:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(212,175,55,0.45);
+}
+
+.btn-anual {
+    background: linear-gradient(135deg, #ffd700, #ffb700);
+    color: #000;
+    box-shadow: 0 3px 10px rgba(255,215,0,0.25);
+}
+
+.btn-anual:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(255,215,0,0.45);
+}
+
+.btn-cut {
+    background: rgba(231,76,60,0.12);
+    color: #ff6b6b;
+    border: 1px solid rgba(231,76,60,0.4);
+}
+
+.btn-cut:hover {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.btn-group .btn-action {
+    min-width: 85px;
+}
         #toast { position: fixed; bottom: 20px; right: 20px; background: var(--gold); color: #000; padding: 12px 25px; border-radius: 10px; font-weight: bold; font-size: 0.8rem; display: none; z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); text-transform: uppercase; }
     </style>
 </head>
@@ -42,6 +85,12 @@
             </div>
             <div style="font-size: 0.8rem; color: var(--gold); font-weight: 600;"><i class="fas fa-crown"></i> Admin Mode</div>
         </header>
+        
+
+        <div style="margin-bottom: 20px;">
+    <input type="text" id="buscador-correo" placeholder="Buscar por correo..." 
+           style="width: 100%; padding: 12px; border-radius: 10px; background: #1a1a1a; border: 1px solid var(--border); color: #fff;">
+</div>
 
         <div class="stats-grid">
             <div class="stat-card"><h3>Total Barberías</h3><p id="stat-total">0</p></div>
@@ -72,11 +121,10 @@
 
     <div id="toast"></div>
 
-    <script type="module">
+   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    // IMPORTACIÓN NECESARIA PARA AUTENTICACIÓN
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyACuAv5l3WljFNFLcBuc2XWpyocaW4Z7ns",
@@ -90,8 +138,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+    let todosLosTenants = {};
 
     function showToast(msg) {
         const t = document.getElementById('toast');
@@ -99,52 +146,36 @@
         setTimeout(() => { t.style.display = 'none'; }, 2500);
     }
 
-    // 1. PROTECCIÓN: Solo cargar si estás logueado como Admin
-    onAuthStateChanged(auth, (user) => {
-        if (user && user.email === "antonydeleon13@gmail.com") {
-            console.log("Admin autenticado, cargando datos...");
-            cargarTabla();
-        } else {
-            // Si no está logueado, forzamos login
-            document.body.innerHTML = `
-                <div style="display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:column;">
-                    <button onclick="signInWithPopup(auth, provider)" style="padding:15px 30px; cursor:pointer; background:var(--gold); border:none; border-radius:10px; font-weight:bold;">
-                        ENTRAR COMO ADMINISTRADOR
-                    </button>
-                </div>
-            `;
+    function renderizarTabla() {
+        const tbody = document.getElementById('tabla-tenants');
+        const buscador = document.getElementById('buscador-correo');
+        const filtro = buscador ? buscador.value.toLowerCase() : "";
+        
+        if(!tbody) return;
+        tbody.innerHTML = "";
+
+        if (!todosLosTenants) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#555;">No hay barberías.</td></tr>`;
+            return;
         }
-    });
 
-    // 2. FUNCIÓN DE CARGA MANTENIENDO TODA TU LÓGICA ORIGINAL
-    function cargarTabla() {
-        onValue(ref(db, 'tenants'), (snapshot) => { 
-            const data = snapshot.val();
-            const tbody = document.getElementById('tabla-tenants');
-            if(!tbody) return;
-            tbody.innerHTML = "";
+        let total = 0, activos = 0, vencidos = 0;
+        const ahora = new Date();
 
-            if (!data) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#555;">No hay barberías.</td></tr>`;
-                return;
-            }
+        Object.keys(todosLosTenants).forEach(tenantId => {
+            const tenant = todosLosTenants[tenantId];
+            const email = (tenant.usuario_email || '').toLowerCase();
 
-            let total = 0, activos = 0, vencidos = 0;
-            const ahora = new Date();
-
-            Object.keys(data).forEach(tenantId => {
+            if (email.includes(filtro)) {
                 total++;
-                const tenant = data[tenantId];
-                const suscripcion = tenant.suscripcion;
-                
-                let tipoPlan = suscripcion ? suscripcion.tipo_plan : "Ninguno";
+                const suscripcion = tenant.suscripcion || {};
+                let tipoPlan = suscripcion.tipo_plan || "Ninguno";
                 let fechaVenceTxt = "---";
                 let estadoHTML = `<span class="badge badge-none">Sin Pago</span>`;
 
-                if (suscripcion) {
+                if (suscripcion.fecha_vencimiento) {
                     const fVence = new Date(suscripcion.fecha_vencimiento);
-                    fechaVenceTxt = fVence.toLocaleDateString([], { day: '2-digit', month: '2-digit', year: 'numeric' });
-                    
+                    fechaVenceTxt = fVence.toLocaleDateString([], {day: '2-digit', month: '2-digit', year: 'numeric'});
                     if (ahora < fVence && suscripcion.estado === "ACTIVE") {
                         estadoHTML = `<span class="badge badge-active">Activo</span>`;
                         activos++;
@@ -152,6 +183,10 @@
                         estadoHTML = `<span class="badge badge-expired">Vencido</span>`;
                         vencidos++;
                     }
+                } else if (suscripcion.estado === "ACTIVE") {
+                    fechaVenceTxt = "Activa";
+                    estadoHTML = `<span class="badge badge-active">Activo</span>`;
+                    activos++;
                 } else {
                     vencidos++;
                 }
@@ -159,49 +194,53 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${tenant.nombre_barberia || 'Stylo Studio'}</strong><br><small>${tenantId}</small></td>
-                    <td>${tenant.usuario_email || 'Sin correo'}</td>
+                    <td><div>${tenant.usuario_email || 'Sin correo'}</div><small style="color:#777;">${tenant.contacto || 'Sin teléfono'}</small></td>
                     <td style="text-transform:uppercase;">${tipoPlan}</td>
                     <td>${fechaVenceTxt}</td>
                     <td>${estadoHTML}</td>
                     <td>
                         <div class="btn-group">
-                            <button class="btn-action" onclick="window.activarManual('${tenantId}', 'mensual')">+1 Mes</button>
+                            <button class="btn-action btn-mensual" onclick="window.activarManual('${tenantId}', 'mensual')">+1 Mes</button>
+                            <button class="btn-action btn-anual" onclick="window.activarManual('${tenantId}', 'anual')">+1 Año</button>
                             <button class="btn-action" onclick="window.entrarComoBarbero('${tenantId}')">Soporte</button>
-                            ${suscripcion ? `<button class="btn-action btn-cut" onclick="window.cortarAcceso('${tenantId}')">Cortar</button>` : ''}
+                            <button class="btn-action btn-cut" onclick="window.cortarAcceso('${tenantId}')">Cortar</button>
                         </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
-            });
-            document.getElementById('stat-total').innerText = total;
-            document.getElementById('stat-activos').innerText = activos;
-            document.getElementById('stat-vencidos').innerText = vencidos;
+            }
         });
+        document.getElementById('stat-total').innerText = total;
+        document.getElementById('stat-activos').innerText = activos;
+        document.getElementById('stat-vencidos').innerText = vencidos;
     }
 
-    // 3. FUNCIONES GLOBALES (Mantenidas)
+    // Listener para buscador
+    document.getElementById('buscador-correo').addEventListener('input', renderizarTabla);
+
+    // Carga inicial
+    onValue(ref(db, 'tenants'), (snapshot) => { 
+        todosLosTenants = snapshot.val() || {};
+        renderizarTabla();
+    });
+
+    // Funciones Globales
     window.activarManual = async (tenantId, tipo) => {
-        const f = new Date(); f.setDate(f.getDate() + (tipo === 'mensual' ? 30 : 365));
-        await update(ref(db, `tenants/${tenantId}/suscripcion`), {
-            estado: "ACTIVE", tipo_plan: tipo, fecha_vencimiento: f.toISOString()
-        });
-        showToast("ACTUALIZADO");
+        const f = new Date();
+        tipo === 'anual' ? f.setFullYear(f.getFullYear() + 1) : f.setMonth(f.getMonth() + 1);
+        await update(ref(db, `tenants/${tenantId}/suscripcion`), { estado: "ACTIVE", tipo_plan: tipo, fecha_vencimiento: f.toISOString() });
+        showToast(tipo === 'anual' ? "PLAN ANUAL ACTIVADO" : "PLAN MENSUAL ACTIVADO");
     };
 
     window.cortarAcceso = async (tenantId) => {
-        await remove(ref(db, `tenants/${tenantId}/suscripcion`));
-        showToast("CORTADO");
+        await update(ref(db, `tenants/${tenantId}/suscripcion`), { estado: "PENDIENTE" });
+        showToast("ACCESO CORTADO");
     };
 
     window.entrarComoBarbero = (tenantId) => {
         localStorage.setItem('admin_impersonate', tenantId);
         window.open('barbero.html', '_blank');
     };
-    
-    // Hacemos auth global para que el botón de login funcione
-    window.auth = auth;
-    window.signInWithPopup = signInWithPopup;
-    window.provider = provider;
 </script>
 </body>
 </html>
